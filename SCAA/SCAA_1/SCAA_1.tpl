@@ -1,78 +1,104 @@
-//PROGRAM NAME AND PURPOSE
-//CREATED BY:
-//DATE CREATED:
-//MODIFIED BY:
-//LAST MODIFIED
+// SCAA_1 - Statistical Catch at Age Model One
+// CREATED BY: Marvin Mace
+// DATE CREATED: 23 March 2021
 
+// Minimal catch at age model implemented in ADMB.
+
+// Data sources: catch at age, one fishery independent index
 
 GLOBALS_SECTION
-//The globals section is used to refer to other C++ code or can
-//be used to create string variables
+  // The globals section is used to refer to other C++ code or can
+  // be used to create string variables
 
 
 TOP_OF_MAIN_SECTION
-//The top of main section is used to modify defaults of variables like the 
-//maximum number of parameters and the amount of memory to allocate for
-//the program
+  // The top of main section is used to modify defaults of variables like the 
+  // maximum number of parameters and the amount of memory to allocate for
+  // the program
 
 
 DATA_SECTION
-//The data section is where we read in data 
-//and specify any constants (or randomly generated numbers)
+  // The data section is where we read in data 
+  // and specify any constants (or randomly generated numbers)
 
-  int nyrs
+  int nyears
   int fage
   int lage
-  init_vector c_obs(0,nyears)
-  init_matrix Cageprop_obs(0,nyears,fage,lage)
-  init_vector Iobs(0,nyears) //observed index
-  init_matrix Iageprop_obs(0,nyears,fage,lage)
-  init_number Csd //standard deviation for catch
-  init_number Ceffn //effective sample size for catch at age props
-  init_number Isd //standard deviation for survey index
-  init_number Ieffn //effective sample size for survey index  at age props
-  init_number M
+  init_vector C_obs(0,nyears)
+  init_matrix C_ageprop_obs(0,nyears,fage,lage)
+  init_vector I_obs(0,nyears) //observed index
+  init_matrix I_ageprop_obs(0,nyears,fage,lage)
+  init_number C_sd //standard deviation for catch
+  init_number C_effn //effective sample size for catch at age props
+  init_number I_sd //standard deviation for survey index
+  init_number I_effn //effective sample size for survey index  at age props
+  init_number M //Instantaneous natural mortality rate
   init_int eofcheck //end of file check for data
 
-
-  int y //looping
-  int a 
+  // looping variables
+  int y // year
+  int a // age
 
  LOCAL_CALCS
-  //the local calcs section is used to execute code in the data section.
-  //Functions defined below are not available in this local calcs section.
+  // The local calcs section is used to execute code in the data section.
+  // Functions defined below are not available in this local calcs section.
+
+  // Make sure data is begin read in properly
   
+  if(eofcheck != eofcheck)
+  {
+  
+    cout << "Input not reading properly!" << endl;
+    cout << "nyrs" << endl; cout << nyears << endl;
+    cout << "fage" << endl; cout << fage << endl;
+    cout << "lage" << endl; cout << lage << endl;
+    cout << "C_obs" << endl; cout << C_obs << endl;
+    cout << "C_ageprop_obs" << endl; cout << C_ageprop_obs << endl;
+    cout << "I_obs" << endl; cout << I_obs << endl;
+    cout << "I_ageprop_obs" << endl; cout << I_ageprop_obs << endl;
+    cout << "C_sd" << endl; cout << C_sd << endl;
+    cout << "C_effn" << endl; cout << C_effn << endl;
+    cout << "I_sd" << endl; cout << I_sd << endl;
+    cout << "I_effn" << endl; cout << I_effn << endl;
+    cout << "M" << endl; cout << M << endl;
+    cout << "eofcheck" << endl; cout << eofcheck << endl;
+
+  }
+
+
  END_CALCS
 
 PARAMETER_SECTION
-  //The parameter section is where we specify the parameters to be estimated (init)
-  //and any other values that will depend on the estimated parameters (i.e., variables)
+  // The parameter section is where we specify the parameters to be estimated (init)
+  // and any other values that will depend on the estimated parameters (i.e., variables)
+
+  
 
   objective_function_value neg_LL  //value we are going to minimize
 
   LOCAL_CALCS
-  //This local calcs section is used to execute code in the parameter section.
-  //Functions defined below are available in this local calcs section.
+  // This local calcs section is used to execute code in the parameter section.
+  // Functions defined below are available in this local calcs section.
   
   
  END_CALCS
 
 INITIALIZATION_SECTION
-//Section that can be used to provide starting values for parameters
+  // Section that can be used to provide starting values for parameters
 
 PRELIMINARY_CALCS_SECTION
-//Calculations to do before entering the procedure section
+  // Calculations to do before entering the procedure section
 
 PROCEDURE_SECTION
-//In the procedure section we specify the model and the likelihood.
+  // In the procedure section we specify the model and the likelihood.
 
 
 REPORT_SECTION
-//The report section is used to write output to the standard output "filename.rep"
+  // The report section is used to write output to the standard output "filename.rep"
 
 RUNTIME_SECTION
-//This section is used to modify the convergence criteria such as the 
-//maximum number of iterations and the maximum gradient component
+  // This section is used to modify the convergence criteria such as the 
+  // maximum number of iterations and the maximum gradient component
 
-//Leave at least one empty line below here
+  // Leave at least one empty line below here
 
