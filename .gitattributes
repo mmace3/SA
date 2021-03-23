@@ -1,0 +1,2 @@
+# to tell github that .tpl files are c++
+    *.tpl linguist-language=C++
