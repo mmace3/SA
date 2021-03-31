@@ -14,6 +14,10 @@
 # Load packages, set options
 #-------------------------------------------------------------------------------
 
+library(ADMBtools) # only needed for writing out .dat file for ADMB model
+
+
+
 #-------------------------------------------------------------------------------
 
 # set random seed for reproducibility
@@ -46,20 +50,17 @@ nages <- lage - fage + 1
 # fully selected fishing mortality rate by year
 F_full <- 0.6
 
-# parameters for selectivity curve
-alpha <- 0.2
+# parameters for selectivity curve (logistic)
+f_sel_pars <- c(1.5, 3)
 
-# beta
-beta <- 0.45
-
-# fishery selectivity (logistic for ages <= 5, 1 for ages > 5)
-f_sel <- ifelse(ages <= 5, exp(alpha + beta*ages)/(1 + exp(alpha + beta*ages)), 1)
+# fishery selectivity (logistic)
+f_sel <- 1/(1 + exp(-fsel_pars[1]*(ages - fsel_pars[2])))
 
 # Fishing mortality
 F <- F_full*f_sel
 
 # natural mortality rate
-M <- 0.2
+M <- 0.15
 
 # total mortality
 Z <- F + M
@@ -130,16 +131,38 @@ for(i in 1:(nyears))
 
 }
 
+# Total catch each year
+C_obs_total <- rowSums(C_obs)
+
+# Create proportion at age for catch matrix
+C_ageprop_obs <- matrix(0, nrow = nyears, ncol = nages)
+
+# Fill in proportion at age for catch matrix
+for(i in 1:(nyears))
+{
+
+  C_ageprop_obs[i,] <- rmultinom(1, size = 100, prob = (C_obs[i,]/C_obs_total[i]))
+
+}
+
+
 # create matrix for catch at age in fishery independent survey
 I_obs <- matrix(0, nrow = nyears, ncol = nages)
 
 # catchability for fishery independent survey
 I_q <- 0.001
 
+# selectivity for fishery independent survey (logistic)
+
+s_sel_pars <- c(1, 1.5)
+
+# survey selectivity (logistic)
+s_sel <- 1/(1 + exp(-s_sel_pars[1]*(ages - s_sel_pars[2])))
+
 for(i in 1:(nyears))
 {
 
-  I_obs[i,] <- I_q*f_sel*N_pop[i,]
+  I_obs[i,] <- I_q*s_sel*N_pop[i,]
 
 }
 
@@ -158,9 +181,27 @@ for(i in 1:(nyears))
 }
 
 
-# Need to create age proportion for catch at age in fishery using rmultinom()
+# Create list to hold all simulated data
 
-# I think that is about all that needs to be done to create all data needed for now
+SCAA_1_sim_data <-
+  list(
+       fyear  = fyear,
+       lyear  = lyear,
+       nyears = nyears,
+       years  = years,
+       fage   = fage,
+       lage   = lage,
+       ages   = ages,
+       nages  = nages,
+       M      = M,
+       C_obs  = C_obs,
+       C_obs_total    = C_obs_total,
+       C_ageprop_obs  = C_ageprop_obs,
+       I_obs  = I_obs,
+       I_obs_total    = I_obs_total,
+       I_ageprop_obs  = I_ageprop_obs
+      )
+
 
 
 
