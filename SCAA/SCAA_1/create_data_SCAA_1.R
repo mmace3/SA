@@ -14,10 +14,6 @@
 # Load packages, set options
 #-------------------------------------------------------------------------------
 
-library(ADMBtools) # only needed for writing out .dat file for ADMB model
-
-
-
 #-------------------------------------------------------------------------------
 
 # set random seed for reproducibility
@@ -56,7 +52,7 @@ f_sel_pars <- c(1.5, 3)
 # fishery selectivity (logistic)
 f_sel <- 1/(1 + exp(-fsel_pars[1]*(ages - fsel_pars[2])))
 
-# Fishing mortality
+# fishing mortality
 F <- F_full*f_sel
 
 # natural mortality rate
@@ -131,28 +127,34 @@ for(i in 1:(nyears))
 
 }
 
-# Total catch each year
-C_obs_total <- rowSums(C_obs)
+# standard deviation for fishery catch
+Csd <- 0.1
 
-# Create proportion at age for catch matrix
+# total catch each year
+C_obs_total <- rowSums(C_obs)*exp(Csd)
+
+# effective sample size for fishery catch at age
+Ceffn <- 100
+
+# create proportion at age for catch matrix
 C_ageprop_obs <- matrix(0, nrow = nyears, ncol = nages)
 
-# Fill in proportion at age for catch matrix
+# fill in proportion at age for catch matrix
 for(i in 1:(nyears))
 {
 
-  C_ageprop_obs[i,] <- rmultinom(1, size = 100, prob = (C_obs[i,]/C_obs_total[i]))
+  C_ageprop_obs[i,] <- rmultinom(1, size = Ceffn, prob = (C_obs[i,]/C_obs_total[i]))
 
 }
 
 
-# create matrix for catch at age in fishery independent survey
+# create matrix for catch at age in survey
 I_obs <- matrix(0, nrow = nyears, ncol = nages)
 
-# catchability for fishery independent survey
+# catchability for survey
 I_q <- 0.001
 
-# selectivity for fishery independent survey (logistic)
+# selectivity for survey (logistic)
 
 s_sel_pars <- c(1, 1.5)
 
@@ -166,22 +168,28 @@ for(i in 1:(nyears))
 
 }
 
-I_obs_total <- rowSums(I_obs)
+# standard deviation for survey index
+Isd <- 0.4
 
-# create proportion at age for fishery independent survey
+# calculate survey index for each year
+I_obs_total <- rowSums(I_obs)*exp(Isd)
 
+# create proportion at age for survey
 I_ageprop_obs <- matrix(0, nrow = nyears, ncol = nages)
 
+# effective sample size for survey catch at age
+Ieffn <- 100
 
+# fill in proportion at age for survey
 for(i in 1:(nyears))
 {
 
-  I_ageprop_obs[i,] <- rmultinom(1, size = 100, prob = (I_obs[i,]/I_obs_total[i]))
+  I_ageprop_obs[i,] <- rmultinom(1, size = Ieffn, prob = (I_obs[i,]/I_obs_total[i]))
 
 }
 
 
-# Create list to hold all simulated data
+# create list to hold all simulated data
 
 SCAA_1_sim_data <-
   list(
@@ -194,14 +202,19 @@ SCAA_1_sim_data <-
        ages   = ages,
        nages  = nages,
        M      = M,
+       Csd    = Csd,
+       Ceffn  = Ceffn,
        C_obs  = C_obs,
        C_obs_total    = C_obs_total,
        C_ageprop_obs  = C_ageprop_obs,
+       Isd    = Isd,
+       Ieffn  = Ieffn,
        I_obs  = I_obs,
        I_obs_total    = I_obs_total,
        I_ageprop_obs  = I_ageprop_obs
       )
 
 
-
+# save list with simulated to file
+saveRDS(SCAA_1_sim_data, file = "SCAA_1_sim_data.RDS")
 
