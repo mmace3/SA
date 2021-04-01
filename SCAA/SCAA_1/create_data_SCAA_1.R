@@ -143,7 +143,7 @@ C_ageprop_obs <- matrix(0, nrow = nyears, ncol = nages)
 for(i in 1:(nyears))
 {
 
-  C_ageprop_obs[i,] <- rmultinom(1, size = Ceffn, prob = (C_obs[i,]/C_obs_total[i]))
+  C_ageprop_obs[i,] <- rmultinom(1, size = Ceffn, prob = (C_obs[i,]/C_obs_total[i]))/Ceffn
 
 }
 
@@ -184,7 +184,7 @@ Ieffn <- 100
 for(i in 1:(nyears))
 {
 
-  I_ageprop_obs[i,] <- rmultinom(1, size = Ieffn, prob = (I_obs[i,]/I_obs_total[i]))
+  I_ageprop_obs[i,] <- rmultinom(1, size = Ieffn, prob = (I_obs[i,]/I_obs_total[i]))/Ieffn
 
 }
 

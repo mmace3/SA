@@ -20,19 +20,22 @@ TOP_OF_MAIN_SECTION
 DATA_SECTION
   // The data section is where we read in data 
   // and specify any constants (or randomly generated numbers)
-
+ 
+  init_int fyear
+  init_int lyear
   int nyears
-  int fage
-  int lage
-  init_vector C_obs(0,nyears)
-  init_matrix C_ageprop_obs(0,nyears,fage,lage)
-  init_vector I_obs(0,nyears) //observed index
-  init_matrix I_ageprop_obs(0,nyears,fage,lage)
+  !!nyears = lyear - fyear + 1;
+  init_int fage
+  init_int lage
+  init_number M //instantaneous natural mortality rate
   init_number C_sd //standard deviation for catch
   init_number C_effn //effective sample size for catch at age props
+  init_vector C(1,nyears) // catch at age in fishery
+  init_matrix C_ageprop_obs(1,nyears,fage,lage) //proportion at age in fishery
   init_number I_sd //standard deviation for survey index
   init_number I_effn //effective sample size for survey index  at age props
-  init_number M //Instantaneous natural mortality rate
+  init_vector I(1,nyears) //observed index
+  init_matrix I_ageprop_obs(1,nyears,fage,lage) //proportion at age in survey
   init_int eofcheck //end of file check for data
 
   // looping variables
@@ -45,25 +48,30 @@ DATA_SECTION
 
   // Make sure data is begin read in properly
   
-  if(eofcheck != eofcheck)
+  if(eofcheck != 1234)
   {
   
     cout << "Input not reading properly!" << endl;
+    cout << "fyear" << endl; cout << fyear << endl;
+    cout << "lyear" << endl; cout << lyear << endl;
     cout << "nyrs" << endl; cout << nyears << endl;
     cout << "fage" << endl; cout << fage << endl;
     cout << "lage" << endl; cout << lage << endl;
-    cout << "C_obs" << endl; cout << C_obs << endl;
-    cout << "C_ageprop_obs" << endl; cout << C_ageprop_obs << endl;
-    cout << "I_obs" << endl; cout << I_obs << endl;
-    cout << "I_ageprop_obs" << endl; cout << I_ageprop_obs << endl;
+    cout << "M" << endl; cout << M << endl;
     cout << "C_sd" << endl; cout << C_sd << endl;
     cout << "C_effn" << endl; cout << C_effn << endl;
+    cout << "C" << endl; cout << C << endl;
+    cout << "C_ageprop_obs" << endl; cout << C_ageprop_obs << endl;
     cout << "I_sd" << endl; cout << I_sd << endl;
     cout << "I_effn" << endl; cout << I_effn << endl;
-    cout << "M" << endl; cout << M << endl;
+    cout << "I" << endl; cout << I << endl;
+    cout << "I_ageprop_obs" << endl; cout << I_ageprop_obs << endl;
     cout << "eofcheck" << endl; cout << eofcheck << endl;
 
+    exit(1);
   }
+
+
 
 
  END_CALCS
@@ -72,14 +80,15 @@ PARAMETER_SECTION
   // The parameter section is where we specify the parameters to be estimated (init)
   // and any other values that will depend on the estimated parameters (i.e., variables)
 
-  
 
   objective_function_value neg_LL  //value we are going to minimize
+
+
 
   LOCAL_CALCS
   // This local calcs section is used to execute code in the parameter section.
   // Functions defined below are available in this local calcs section.
-  
+
   
  END_CALCS
 
@@ -89,6 +98,7 @@ INITIALIZATION_SECTION
 PRELIMINARY_CALCS_SECTION
   // Calculations to do before entering the procedure section
 
+  
 PROCEDURE_SECTION
   // In the procedure section we specify the model and the likelihood.
 
