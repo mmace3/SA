@@ -43,17 +43,31 @@ ages <- c(fage:lage)
 # number of ages
 nages <- lage - fage + 1
 
-# fully selected fishing mortality rate by year
-F_full <- 0.6
+# fully selected fishing mortality rate
+F_mean <- 0.4
+
+# standard deviation of F
+F_sd <- 0.2
+
+# yearly deviations for F
+F_devs <- rnorm(nyears, 0, F_sd)
 
 # parameters for selectivity curve (logistic)
 f_sel_pars <- c(1.5, 3)
 
 # fishery selectivity (logistic)
-f_sel <- 1/(1 + exp(-fsel_pars[1]*(ages - fsel_pars[2])))
+f_sel <- 1/(1 + exp(-f_sel_pars[1]*(ages - f_sel_pars[2])))
 
-# fishing mortality
-F <- F_full*f_sel
+# matrix of fishing mortality by age and year
+F <- matrix(0, nrow = nyears, ncol = nages)
+
+# fill in matrix of fishing mortality age and year
+for(i in 1:(nyears))
+{
+
+  F[i,] <- (F_mean*exp(F_devs[i]))*f_sel
+
+}
 
 # natural mortality rate
 M <- 0.15
@@ -77,20 +91,20 @@ N_devs <- rnorm(nages, 0, R_sd)
 N_pop <- matrix(0, nrow = nyears, ncol = nages)
 
 # fill in recruitment for each year
-
 N_pop[,1] <- med_R*exp(R_devs)
 
-# age 2 first in first year
-N_pop[1,2] <- N_pop[1,1]*exp(-Z[1])
+# age 2 in first year
+N_pop[1,2] <- N_pop[1,1]*exp(-Z[1,1])
 
 # age 3 to final age in first year
-for(a in 2:(nages-2))
+for(a in 2:(lage-2))
 {
-  N_pop[1,a+1] <- N_pop[1,a]*exp(-Z[a])
+  #print(a)
+  N_pop[1,a+1] <- N_pop[1,a]*exp(-Z[1,a])
 }
 
 # final age (plus group) in first year
-N_pop[1,lage] <- N_pop[1,lage-1]*exp(-Z[lage-1])/(1-exp(-Z[lage]))
+N_pop[1,lage] <- N_pop[1,lage-1]*exp(-Z[1,lage-1])/(1-exp(-Z[1,lage]))
 
 # add in random noise to first year abundance
 N_pop[1,(fage+1):lage] <- N_pop[1,(fage+1):lage]*exp(N_devs[-1])
@@ -102,12 +116,10 @@ for(i in 1:(nyears-1))
   for(j in 1:(nages-1))
   {
     #print(paste("This is year", i, " age ", j, sep = ""))
-
-
-    N_pop[i+1,j+1] <- N_pop[i,j]*exp(-Z[j])
+    N_pop[i+1,j+1] <- N_pop[i,j]*exp(-Z[i,j])
   }
 
-  N_pop[i+1,lage] <- N_pop[i+1,lage] + (N_pop[i,lage]*exp(-Z[lage]))
+  N_pop[i+1,lage] <- N_pop[i+1,lage] + (N_pop[i,lage]*exp(-Z[i,lage]))
 
 }
 
@@ -121,7 +133,7 @@ for(i in 1:(nyears))
   for(j in 1:(nages))
   {
 
-    C_obs[i,j] <- (F[j]/Z[j]) * (1-exp(-Z[j])) * N_pop[i,j]
+    C_obs[i,j] <- (F[i,j]/Z[i,j]) * (1-exp(-Z[i,j])) * N_pop[i,j]
 
   }
 
@@ -131,7 +143,7 @@ for(i in 1:(nyears))
 Csd <- 0.1
 
 # total catch each year
-C_obs_total <- rowSums(C_obs)*exp(Csd)
+C_obs_total <- rowSums(C_obs)*exp(rnorm(nyears, 0, Csd))
 
 # effective sample size for fishery catch at age
 Ceffn <- 100
@@ -147,12 +159,11 @@ for(i in 1:(nyears))
 
 }
 
-
 # create matrix for catch at age in survey
 I_obs <- matrix(0, nrow = nyears, ncol = nages)
 
 # catchability for survey
-I_q <- 0.001
+I_q <- 0.0001
 
 # selectivity for survey (logistic)
 
