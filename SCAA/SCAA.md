@@ -6,4 +6,4 @@ Simple Catch at Age Model
 
 Abundance at age modeled as:
 
-\[ N_{a+1,t+1} = N_{a,t} e^{-Z} \]
+\[N_{a+1,t+1} = N_{a,t} e^{-Z}\]
